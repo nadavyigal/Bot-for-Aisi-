@@ -1,0 +1,65 @@
+feedback:
+  # Main feedback prompt
+  prompt:
+    message: "איך היתה השיחה איתי? דרג בין 1 ל-5 או שלח 👍/👎"
+    typing_delay: 2000
+    validation:
+      type: "feedback"
+      patterns:
+        - type: "numeric"
+          regex: "^[1-5]$"
+          store_as: "numeric_rating"
+        - type: "emoji"
+          regex: "^(👍|👎)$"
+          store_as: "emoji_rating"
+          mapping:
+            "👍": 5
+            "👎": 1
+    
+  # Follow-up messages based on rating
+  responses:
+    high: # 4-5 or 👍
+      message: "תודה רבה! שמח שיכולתי לעזור 😊"
+      typing_delay: 1500
+    
+    medium: # 3
+      message: "תודה על המשוב. נשמח לשמוע איך נוכל להשתפר."
+      typing_delay: 1500
+    
+    low: # 1-2 or 👎
+      message: "מצטערים לשמוע. נבדוק איך להשתפר בהמשך."
+      typing_delay: 1500
+
+  # Metadata to capture with feedback
+  metadata:
+    session_id: string
+    timestamp: datetime
+    conversation_duration: number # in seconds
+    total_messages: number
+    completion_status: string # "complete" | "abandoned"
+    last_step: string
+    user_phone: string
+    project_matches_count: number
+
+  # Optional comments prompt for low ratings
+  low_rating_followup:
+    enabled: true
+    message: "האם תרצה לשתף אותנו במה אפשר להשתפר?"
+    typing_delay: 2000
+    store_as: "improvement_feedback"
+
+  # Daily summary configuration
+  summary:
+    enabled: true
+    schedule: "0 9 * * *" # 9 AM daily
+    recipients:
+      - role: "operations"
+        email: "${OPERATIONS_EMAIL}"
+      - role: "product"
+        email: "${PRODUCT_EMAIL}"
+    format:
+      - total_feedback_count
+      - average_rating
+      - rating_distribution
+      - low_ratings_comments
+      - completion_rate
